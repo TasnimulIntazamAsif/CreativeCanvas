@@ -4,6 +4,11 @@ import { signal } from "@preact/signals-react";
 export const galleryModalVisibleDuringDrag = signal(true);
 export const galleryReopenAfterDragSignal = signal(false);
 export const galleryModalVisibleViewMode = signal(false);
+// Optional top-level tab to land on the next time the view-mode gallery opens
+// (e.g. the sidebar's "Folders" link). Consumed and reset by the modal.
+export const galleryModalRequestedTab = signal<"unsorted" | "folders" | null>(
+  null,
+);
 // True while an item is being dragged out of the gallery. The modal stays open
 // but goes translucent and pointer-transparent so the drag can pass "under" it
 // onto the canvas; it refocuses (or closes, per the reopen-after-adding setting)

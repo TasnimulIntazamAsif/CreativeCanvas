@@ -18,7 +18,8 @@
 }
 
 /* Light theme: the scrollbar track/thumb must be light, not the dark defaults. */
-.theme-light {
+.theme-light,
+.theme-light * {
   scrollbar-color: #c4c4c8 #ececef;
 }
 

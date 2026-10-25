@@ -19,7 +19,7 @@ function getStoredTheme(): AppTheme {
   ) {
     return value === "gradient" ? "aurora" : (value as AppTheme);
   }
-  return "gray";
+  return "light";
 }
 
 function applyTheme(theme: AppTheme) {

@@ -67,6 +67,7 @@ import { AppsQuickMenu } from "./AppsQuickMenu";
 import { SceneTitleInput } from "./SceneTitleInput";
 import { TaskQueue } from "./TaskQueue";
 import { UploadImagesButton } from "./UploadImagesButton";
+import { ThemeToggleButton } from "./ThemeToggleButton";
 
 interface Props {
   pageName: string;
@@ -546,7 +547,7 @@ export const TopBar = ({ pageName }: Props) => {
                     {sumTotalCredits.toLocaleString()}
                   </span>
                 }
-                buttonClassName="h-8 px-3 ps-2.5 bg-transparent hover:bg-white/10 border border-white/15 hover:border-white/30 shadow-none text-white/80 rounded-[3px] gap-1.5"
+                buttonClassName="h-8 px-3 ps-2.5 bg-transparent hover:bg-base-fg/10 border border-base-fg/15 hover:border-base-fg/30 shadow-none text-base-fg/80 rounded-[3px] gap-1.5"
                 panelClassName="mt-2 bg-[#101014] border border-white/15 text-white rounded-[3px]"
               >
                 {(close) => (
@@ -625,7 +626,7 @@ export const TopBar = ({ pageName }: Props) => {
                 type="button"
                 onClick={handleOpenGalleryModal}
                 aria-label="My Library"
-                className="flex h-8 items-center gap-1.5 rounded-[3px] border border-white/15 px-3 font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-white/80 transition-colors hover:border-white/30 hover:bg-white/10"
+                className="flex h-8 items-center gap-1.5 rounded-[3px] border border-base-fg/15 px-3 font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-base-fg/80 transition-colors hover:border-base-fg/30 hover:bg-base-fg/10"
               >
                 <ImagesIcon className="text-[11px]" />
                 <span className="hidden whitespace-nowrap xl:block">
@@ -635,13 +636,15 @@ export const TopBar = ({ pageName }: Props) => {
 
               <UploadImagesButton />
 
+              <ThemeToggleButton />
+
               <Tooltip content="Settings" position="bottom" delay={300}>
                 <Button
                   aria-label="Settings"
                   variant="secondary"
                   icon={SettingsIcon}
                   iconClassName="h-4 w-4 shrink-0"
-                  className="h-8 w-8 border-white/15 bg-transparent p-0 text-white/80 hover:border-white/30 hover:bg-white/10"
+                  className="h-8 w-8 border-base-fg/15 bg-transparent p-0 text-base-fg/80 hover:border-base-fg/30 hover:bg-base-fg/10"
                   onClick={() => {
                     setSettingsSection("general");
                     setIsSettingsModalOpen(true);
@@ -659,14 +662,14 @@ export const TopBar = ({ pageName }: Props) => {
               <div className="no-drag flex items-center">
                 <Button
                   variant="secondary"
-                  className="h-[32px] w-[44px] rounded-none border-0 bg-transparent p-0 text-base-fg opacity-70 shadow-none hover:bg-white/10 hover:opacity-100"
+                  className="h-[32px] w-[44px] rounded-none border-0 bg-transparent p-0 text-base-fg opacity-70 shadow-none hover:bg-base-fg/10 hover:opacity-100"
                   onClick={minimize}
                 >
                   <MinusIcon className="text-xs" />
                 </Button>
                 <Button
                   variant="secondary"
-                  className="h-[32px] w-[44px] rounded-none border-0 bg-transparent p-0 text-base-fg opacity-70 shadow-none hover:bg-white/10 hover:opacity-100"
+                  className="h-[32px] w-[44px] rounded-none border-0 bg-transparent p-0 text-base-fg opacity-70 shadow-none hover:bg-base-fg/10 hover:opacity-100"
                   onClick={toggleMaximize}
                 >
                   <DynamicIcon

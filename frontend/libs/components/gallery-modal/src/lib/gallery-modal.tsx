@@ -53,6 +53,7 @@ import {
   galleryModalDraggingUnder,
   galleryReopenAfterDragSignal,
   galleryModalVisibleViewMode,
+  galleryModalRequestedTab,
   galleryModalLightboxMediaId,
   galleryModalLightboxImage,
   galleryModalLightboxVisible,
@@ -976,6 +977,17 @@ export const GalleryModal = React.memo(
         cancelled = true;
       };
     }, [mode, galleryModalVisibleViewMode.value, isOpen, usernameRetryCount]);
+
+    // Land on a caller-requested tab (e.g. the sidebar's "Folders" link).
+    useEffect(() => {
+      const requested = galleryModalRequestedTab.value;
+      if (mode !== "view" || !galleryModalVisibleViewMode.value || !requested) {
+        return;
+      }
+      setGalleryTab(requested);
+      setActiveFolderId(null);
+      galleryModalRequestedTab.value = null;
+    }, [mode, galleryModalVisibleViewMode.value, galleryModalRequestedTab.value]);
 
     // Helper to build the cache key for the current filter
     const getCacheKey = useCallback(
