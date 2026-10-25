@@ -1,4 +1,3 @@
-import { ArtcraftAccountBlock } from "./ArtcraftAccountBlock";
 import { MidjourneyAccountBlock } from "./MidjourneyAccountBlock";
 import { GrokAccountBlock } from "./GrokAccountBlock";
 
@@ -6,15 +5,10 @@ interface AccountSettingsPaneProps {
   globalAccountLogoutCallback: () => void;
 }
 
-export const AccountSettingsPane = ({
-  globalAccountLogoutCallback,
-}: AccountSettingsPaneProps) => {
+// The ArtCraft account (login/logout) block is hidden while login is disabled.
+export const AccountSettingsPane = (_props: AccountSettingsPaneProps) => {
   return (
     <div className="flex flex-col gap-5 pt-3 text-base-fg">
-      <ArtcraftAccountBlock
-        globalAccountLogoutCallback={globalAccountLogoutCallback}
-      />
-      <hr className="border-ui-panel-border" />
       <GrokAccountBlock />
       <hr className="border-ui-panel-border" />
       <MidjourneyAccountBlock />

@@ -15,7 +15,6 @@ import { useSignals } from "@preact/signals-react/runtime";
 
 import { TopBar } from "~/components";
 import { ErrorDialog } from "~/components";
-import { LoginModal, useLoginModalStore } from "@storyteller/ui-login-modal";
 import { toast, Toaster } from "@storyteller/ui-toaster";
 import {
   GalleryDragComponent,
@@ -45,13 +44,10 @@ import {
 } from "@storyteller/tauri-events";
 import { SoundManager } from "@storyteller/soundboard";
 import { useStoryboardPageEnabled } from "@storyteller/ui-settings-modal";
-import { DomLevels, usePageSceneStore } from "@storyteller/ui-pagescene";
 
 import { useActiveJobs } from "~/hooks/useActiveJobs";
 import { useBackgroundLoadingMedia } from "~/hooks/useBackgroundLoadingMedia";
 import { UsersApi } from "~/Classes/ApiManager";
-import { authentication } from "~/signals";
-import { AUTH_STATUS } from "~/enums";
 import { useTabStore } from "./Stores/TabState";
 import { useTextToImageStore } from "./PageImage/TextToImageStore";
 
@@ -159,38 +155,15 @@ export const MainApp = ({ sceneToken }: Props) => {
     });
   }, []);
 
-  const { triggerRecheck } = useLoginModalStore();
   const { isOpen: isCreditsOpen, closeModal: closeCreditsModal } =
     useCreditsModalStore();
-  const disableHotkeyInput = usePageSceneStore((s) => s.disableHotkeyInput);
-  const enableHotkeyInput = usePageSceneStore((s) => s.enableHotkeyInput);
 
   const currentReminderModalProps = actionReminderProps.value;
 
   return (
     <div className="w-screen">
-      <TopBar
-        loginSignUpPressed={() => {
-          console.log("PRESSED");
-          triggerRecheck();
-        }}
-        pageName="Edit Scene"
-      />
-      <LoginModal
-        videoSrc2D="/resources/videos/artcraft-canvas-demo.mp4"
-        videoSrc3D="/resources/videos/artcraft-3d-demo.mp4"
-        onOpenChange={(isOpen: boolean) => {
-          if (isOpen) {
-            disableHotkeyInput(DomLevels.DIALOGUE);
-          } else {
-            enableHotkeyInput(DomLevels.DIALOGUE);
-          }
-        }}
-        onArtCraftAuthSuccess={(userInfo: any) => {
-          authentication.status.value = AUTH_STATUS.LOGGED_IN;
-          authentication.userInfo.value = userInfo;
-        }}
-      />
+      {/* Login and account creation are disabled for now. */}
+      <TopBar loginSignUpPressed={() => {}} pageName="Edit Scene" />
 
       <Suspense
         fallback={
