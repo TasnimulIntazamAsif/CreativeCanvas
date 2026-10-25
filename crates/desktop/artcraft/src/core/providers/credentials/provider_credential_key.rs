@@ -10,6 +10,11 @@ pub enum ProviderCredentialKey {
   FalApiKey,
   ReplicateApiKey,
 
+  // LLM providers (AI editing in the video editor).
+  OpenaiApiKey,
+  GeminiApiKey,
+  DeepseekApiKey,
+
   // ========== WEB LOGINS ==========
 
   GrokWebLogin,
@@ -25,6 +30,9 @@ impl ProviderCredentialKey {
       // Api keys
       Self::FalApiKey => ProviderCredentialType::ApiKey,
       Self::ReplicateApiKey => ProviderCredentialType::ApiKey,
+      Self::OpenaiApiKey => ProviderCredentialType::ApiKey,
+      Self::GeminiApiKey => ProviderCredentialType::ApiKey,
+      Self::DeepseekApiKey => ProviderCredentialType::ApiKey,
       // Web logins
       Self::GrokWebLogin => ProviderCredentialType::WebLogin,
       Self::HiggsfieldWebLogin => ProviderCredentialType::WebLogin,
@@ -38,6 +46,9 @@ impl ProviderCredentialKey {
       // Api keys
       ProviderCredentialKey::FalApiKey => "fal.api_key.txt",
       ProviderCredentialKey::ReplicateApiKey => "replicate.api_key.txt",
+      ProviderCredentialKey::OpenaiApiKey => "openai.api_key.txt",
+      ProviderCredentialKey::GeminiApiKey => "gemini.api_key.txt",
+      ProviderCredentialKey::DeepseekApiKey => "deepseek.api_key.txt",
       // Web logins
       ProviderCredentialKey::GrokWebLogin => "grok.web_login.toml",
       ProviderCredentialKey::HiggsfieldWebLogin => "higgsfield.web_login.toml",

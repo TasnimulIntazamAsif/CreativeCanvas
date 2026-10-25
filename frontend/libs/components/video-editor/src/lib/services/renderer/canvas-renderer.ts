@@ -2,6 +2,7 @@ import type { FrameRate } from "opencut-wasm";
 import type { AnyBaseNode } from "./nodes/base-node";
 import { createCanvasSurface } from "./canvas-utils";
 import { buildFrameDescriptor } from "./compositor/frame-descriptor";
+import { applyCanvasEffects } from "./compositor/canvas-effects";
 import { wasmCompositor } from "./compositor/wasm-compositor";
 import { resolveRenderTree } from "./resolve";
 import {
@@ -55,9 +56,15 @@ export class CanvasRenderer {
       name: "resolve",
       fn: () => resolveRenderTree({ node, renderer: this, time }),
     });
-    const { frame, textures } = await measureSpanAsync({
+    const built = await measureSpanAsync({
       name: "buildFrame",
       fn: () => buildFrameDescriptor({ node, renderer: this }),
+    });
+    // Canvas-rendered effects (color, vignette, pixelate…) are baked into
+    // layer textures here; GPU effects stay in the frame for wasm.
+    const { frame, textures } = measureSpanSync({
+      name: "canvasEffects",
+      fn: () => applyCanvasEffects(built),
     });
     wasmCompositor.ensureInitialized({
       width: this.width,

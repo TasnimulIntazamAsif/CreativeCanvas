@@ -41,6 +41,29 @@ const sparkWasmDataUrlFix = (): Plugin => ({
   },
 });
 
+// Dev-only proxy for the video editor's AI command bar when it runs in a
+// plain browser tab (the desktop app calls these providers from Rust).
+// `/__llm/<provider>/chat/completions` -> the provider's OpenAI-compatible API.
+const LLM_PROVIDER_BASE_URLS: Record<string, string> = {
+  openai: "https://api.openai.com/v1",
+  gemini: "https://generativelanguage.googleapis.com/v1beta/openai",
+  deepseek: "https://api.deepseek.com",
+};
+
+const llmDevProxy = Object.fromEntries(
+  Object.entries(LLM_PROVIDER_BASE_URLS).map(([provider, baseUrl]) => {
+    const target = new URL(baseUrl);
+    return [
+      `/__llm/${provider}`,
+      {
+        target: target.origin,
+        changeOrigin: true,
+        rewrite: (p: string) => p.replace(`/__llm/${provider}`, target.pathname.replace(/\/$/, "")),
+      },
+    ];
+  }),
+);
+
 const projectRoot = __dirname;
 const appRoot = path.resolve(projectRoot, "app");
 const workspaceRoot = path.resolve(projectRoot, "..", "..");
@@ -73,6 +96,7 @@ export default defineConfig({
     fs: {
       allow: [workspaceRoot],
     },
+    proxy: llmDevProxy,
   },
   resolve: {
     dedupe: [

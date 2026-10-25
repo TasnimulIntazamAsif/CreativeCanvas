@@ -102,12 +102,15 @@ class EffectPreviewService {
     const isImageReady =
       this.previewImageElement?.complete &&
       (this.previewImageElement.naturalWidth ?? 0) > 0;
-    if (!isImageReady || !this.previewImageElement) {
-      return null;
-    }
 
     const { canvas, context } = createCanvasSurface({ width, height });
-    context.drawImage(this.previewImageElement, 0, 0, width, height);
+    if (isImageReady && this.previewImageElement) {
+      context.drawImage(this.previewImageElement, 0, 0, width, height);
+    } else {
+      // Hosts that don't ship PREVIEW_IMAGE_PATH still get readable
+      // thumbnails: a small drawn scene with color, light and detail.
+      drawFallbackPreviewScene({ context, width, height });
+    }
     return canvas;
   }
 
@@ -149,3 +152,46 @@ class EffectPreviewService {
 }
 
 export const effectPreviewService = new EffectPreviewService();
+
+function drawFallbackPreviewScene({
+  context,
+  width,
+  height,
+}: {
+  context: OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D;
+  width: number;
+  height: number;
+}) {
+  const sky = context.createLinearGradient(0, 0, 0, height * 0.65);
+  sky.addColorStop(0, "#3b82f6");
+  sky.addColorStop(1, "#f9a8d4");
+  context.fillStyle = sky;
+  context.fillRect(0, 0, width, height);
+
+  context.fillStyle = "#fde047";
+  context.beginPath();
+  context.arc(width * 0.7, height * 0.3, height * 0.13, 0, Math.PI * 2);
+  context.fill();
+
+  context.fillStyle = "#16a34a";
+  context.beginPath();
+  context.moveTo(0, height * 0.7);
+  context.quadraticCurveTo(width * 0.3, height * 0.45, width * 0.6, height * 0.68);
+  context.quadraticCurveTo(width * 0.85, height * 0.55, width, height * 0.66);
+  context.lineTo(width, height);
+  context.lineTo(0, height);
+  context.closePath();
+  context.fill();
+
+  const blocks = ["#ef4444", "#f97316", "#facc15", "#22c55e", "#06b6d4", "#8b5cf6"];
+  const blockWidth = width / blocks.length;
+  blocks.forEach((color, index) => {
+    context.fillStyle = color;
+    context.fillRect(index * blockWidth, height * 0.84, blockWidth, height * 0.16);
+  });
+
+  context.fillStyle = "#ffffff";
+  context.font = `bold ${Math.round(height * 0.2)}px Arial, sans-serif`;
+  context.textBaseline = "middle";
+  context.fillText("Aa", width * 0.1, height * 0.27);
+}

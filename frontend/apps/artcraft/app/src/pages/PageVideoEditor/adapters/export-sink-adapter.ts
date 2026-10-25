@@ -1,11 +1,13 @@
 import type {
   ExportArtifact,
   ExportSinkAdapter,
+  ExportSinkProgressEvent,
 } from "@storyteller/ui-video-editor";
-import { kindFromMime } from "@storyteller/ui-video-editor";
+import { downloadExportSink, kindFromMime } from "@storyteller/ui-video-editor";
 import { promptDownloadLocationIfNeeded, downloadUrlToPath } from "@storyteller/tauri-api";
 import { downloadDir } from "@tauri-apps/api/path";
 import { uploadByKind } from "./upload-by-kind";
+import { isDesktopApp } from "../ai/describeAiError";
 
 // Tauri ExportSinkAdapter.
 //
@@ -60,6 +62,12 @@ export const tauriExportSinkAdapter: ExportSinkAdapter = {
 
     if (!saveToDisk && !saveToLibrary) {
       return null;
+    }
+
+    // Browser tab on the dev server: no native save dialog, so "save to
+    // disk" is a regular browser download.
+    if (!isDesktopApp()) {
+      return acceptInBrowser(artifact, { saveToDisk, saveToLibrary, onProgress });
     }
 
     const downloadUrl = URL.createObjectURL(artifact.blob);
@@ -135,3 +143,32 @@ export const tauriExportSinkAdapter: ExportSinkAdapter = {
     return savedPath;
   },
 };
+
+async function acceptInBrowser(
+  artifact: ExportArtifact,
+  options: {
+    saveToDisk: boolean;
+    saveToLibrary: boolean;
+    onProgress?: (event: ExportSinkProgressEvent) => void;
+  },
+): Promise<string | null> {
+  const { saveToDisk, saveToLibrary, onProgress } = options;
+  let savedName: string | null = null;
+  if (saveToDisk) {
+    savedName = await downloadExportSink.accept(artifact, { saveToDisk: true, onProgress });
+  }
+  if (saveToLibrary) {
+    onProgress?.({ destination: "library", status: "uploading" });
+    try {
+      await uploadToLibrary(artifact);
+      onProgress?.({ destination: "library", status: "success" });
+    } catch (error) {
+      onProgress?.({
+        destination: "library",
+        status: "error",
+        error: error instanceof Error ? error.message : "Upload failed",
+      });
+    }
+  }
+  return savedName;
+}

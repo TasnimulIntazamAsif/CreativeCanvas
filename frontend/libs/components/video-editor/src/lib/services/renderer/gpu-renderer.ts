@@ -4,6 +4,7 @@ import {
   initializeGpu,
 } from "opencut-wasm";
 import type { EffectPass, EffectUniformValue } from "../../effects/types";
+import { isCanvasPass, runCanvasPasses } from "../../effects/canvas-passes";
 
 let gpuAvailable = false;
 let initPromise: Promise<void> | null = null;
@@ -39,15 +40,31 @@ export const gpuRenderer = {
     height: number;
     passes: EffectPass[];
   }): OffscreenCanvas {
-    if (passes.length === 0 || !gpuAvailable) {
-      return source;
+    // Canvas passes run in JS first (no GPU needed); the rest go to wasm.
+    const canvasPasses = passes.filter(isCanvasPass);
+    const gpuPasses = passes.filter((pass) => !isCanvasPass(pass));
+
+    let output = source;
+    if (canvasPasses.length > 0) {
+      output = new OffscreenCanvas(width, height);
+      runCanvasPasses({
+        target: output.getContext("2d")!,
+        source,
+        width,
+        height,
+        passes: canvasPasses,
+      });
+    }
+
+    if (gpuPasses.length === 0 || !gpuAvailable) {
+      return output;
     }
 
     return applyEffectPasses({
-      source,
+      source: output,
       width,
       height,
-      passes: serializeEffectPasses(passes),
+      passes: serializeEffectPasses(gpuPasses),
     });
   },
 

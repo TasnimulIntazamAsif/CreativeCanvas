@@ -45,6 +45,8 @@ export interface VideoEditorProps {
   // the export button. Webapp hosts that hide the global topbar inject
   // its actions (pricing/credits/task queue/profile) here.
   headerEndSlot?: ReactNode;
+  // Optional host chrome rendered in the middle of the editor header.
+  headerCenterSlot?: ReactNode;
   // Host route the header's "Exit project" / delete actions navigate to.
   // Defaults to "/projects" for hosts that own that route.
   exitTo?: string;
@@ -58,6 +60,7 @@ export function VideoEditor({
   projectId: _projectId,
   adapters,
   headerEndSlot,
+  headerCenterSlot,
   exitTo,
 }: VideoEditorProps) {
   return (
@@ -79,7 +82,11 @@ export function VideoEditor({
           <EditorErrorBoundary>
             <div className="bg-background flex h-full w-full flex-col overflow-hidden">
               <DegradedRendererBanner />
-              <EditorHeader endSlot={headerEndSlot} exitTo={exitTo} />
+              <EditorHeader
+                endSlot={headerEndSlot}
+                centerSlot={headerCenterSlot}
+                exitTo={exitTo}
+              />
               <div className="min-h-0 min-w-0 flex-1">
                 <EditorLayout />
               </div>

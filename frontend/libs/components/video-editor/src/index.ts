@@ -8,6 +8,19 @@
 export { VideoEditor } from "./lib/VideoEditor";
 export type { VideoEditorProps } from "./lib/VideoEditor";
 
+// Prompt-driven editing: tool-calling loop over the timeline.
+export {
+  runAiEdit,
+  AI_TOOL_DEFINITIONS,
+  buildTimelineSnapshot,
+} from "./lib/ai";
+export type {
+  AiChatCompletion,
+  AiEditProgress,
+  AiEditResult,
+  TimelineSnapshot,
+} from "./lib/ai";
+
 // --- Provider + hook (use only when mounting the inner shell directly) ---
 export { EditorProvider, useEditorAdapters } from "./lib/EditorProvider";
 export type { EditorProviderProps } from "./lib/EditorProvider";
@@ -1205,6 +1218,11 @@ export type {
   SavedSoundsData,
 } from "./lib/sounds/types";
 export type { SoundsAdapter, SoundsSearchResult } from "./lib/adapters";
+export type {
+  TranscriptionAdapter,
+  TranscriptionResult,
+  TranscriptionSegment,
+} from "./lib/adapters";
 export { emptySoundsAdapter } from "./lib/adapters/default";
 
 // --- Stickers ---

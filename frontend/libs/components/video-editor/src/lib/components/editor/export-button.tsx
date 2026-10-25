@@ -28,6 +28,7 @@ import { useEditor } from "../../editor/use-editor";
 import { useEditorAdapters } from "../../EditorProvider";
 import { DEFAULT_EXPORT_OPTIONS } from "../../export/defaults";
 import { mediaTimeToSeconds } from "../../wasm";
+import type { ExportArtifact } from "../../adapters/types";
 import type {
   ExportDestination,
   ExportSinkProgressEvent,
@@ -161,8 +162,13 @@ function ExportPopover({
     DEFAULT_EXPORT_OPTIONS.includeAudio ?? true,
   );
   const [saveToDisk, setSaveToDisk] = useState<boolean>(true);
-  const [saveToLibrary, setSaveToLibrary] = useState<boolean>(true);
+  // Off by default: library upload needs a signed-in Artcraft account.
+  const [saveToLibrary, setSaveToLibrary] = useState<boolean>(false);
   const [saveState, setSaveState] = useState<SaveState>(INITIAL_SAVE_STATE);
+  // The finished render, kept so the user can download it again from the
+  // result panel without re-exporting.
+  const [lastArtifact, setLastArtifact] = useState<ExportArtifact | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const canExport = saveToDisk || saveToLibrary;
 
@@ -170,6 +176,7 @@ function ExportPopover({
     if (!activeProject || !canExport) return;
 
     setSaveState(INITIAL_SAVE_STATE);
+    setLastArtifact(null);
 
     const result = await editor.project.export({
       options: {
@@ -206,14 +213,17 @@ function ExportPopover({
         setSaveState((prev) => updateDestinationStatus(prev, event));
       };
 
+      const artifact: ExportArtifact = {
+        blob: new Blob([result.buffer], { type: mime }),
+        filename,
+        mime,
+        durationMs: durationMs > 0 ? durationMs : undefined,
+      };
+      setLastArtifact(artifact);
+
       try {
         await exportSink.accept(
-          {
-            blob: new Blob([result.buffer], { type: mime }),
-            filename,
-            mime,
-            durationMs: durationMs > 0 ? durationMs : undefined,
-          },
+          artifact,
           {
             saveToDisk,
             saveToLibrary,
@@ -233,8 +243,23 @@ function ExportPopover({
     }
   };
 
+  const handleDownload = async () => {
+    if (!lastArtifact || isDownloading) return;
+    setIsDownloading(true);
+    try {
+      await exportSink.accept(lastArtifact, { saveToDisk: true, saveToLibrary: false });
+    } catch (error) {
+      toast.error("Couldn't download the video", {
+        description: error instanceof Error ? error.message : "Unknown error",
+      });
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   const handleDismiss = () => {
     setSaveState(INITIAL_SAVE_STATE);
+    setLastArtifact(null);
     onOpenChange(false);
   };
 
@@ -427,6 +452,9 @@ function ExportPopover({
             {!isExporting && saveState.phase !== "idle" && (
               <SavePhasePanel
                 saveState={saveState}
+                artifact={lastArtifact}
+                isDownloading={isDownloading}
+                onDownload={handleDownload}
                 onDismiss={handleDismiss}
               />
             )}
@@ -439,9 +467,15 @@ function ExportPopover({
 
 function SavePhasePanel({
   saveState,
+  artifact,
+  isDownloading,
+  onDownload,
   onDismiss,
 }: {
   saveState: SaveState;
+  artifact: ExportArtifact | null;
+  isDownloading: boolean;
+  onDownload: () => void;
   onDismiss: () => void;
 }) {
   const settled = saveState.phase === "settled";
@@ -474,6 +508,30 @@ function SavePhasePanel({
           />
         ))}
       </div>
+      {settled && artifact && (
+        <div className="space-y-2 rounded-md border border-ui-controls-border p-2.5">
+          <div className="flex items-center justify-between gap-2 text-xs">
+            <span className="truncate font-medium" title={artifact.filename}>
+              {artifact.filename}
+            </span>
+            <span className="text-muted-foreground shrink-0">
+              {formatFileSize(artifact.blob.size)}
+            </span>
+          </div>
+          <Button
+            className="w-full gap-2 rounded-md"
+            onClick={onDownload}
+            disabled={isDownloading}
+          >
+            {isDownloading ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Download className="size-4" />
+            )}
+            Download video
+          </Button>
+        </div>
+      )}
       {settled && (
         <Button
           variant="outline"
@@ -588,4 +646,9 @@ function ExportError({
       </div>
     </div>
   );
+}
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }

@@ -26,18 +26,28 @@ export interface EditorHeaderProps {
   // the webapp's pricing/credits/task queue/profile cluster when the
   // global topbar is hidden).
   endSlot?: ReactNode;
+  // Optional host chrome rendered between the project name and the export
+  // button (e.g. the Tauri app's AI command bar).
+  centerSlot?: ReactNode;
   // Host route to navigate to when the user exits or deletes the open
   // project (the host owns routing; the editor shell has no routes).
   exitTo?: string;
 }
 
-export function EditorHeader({ endSlot, exitTo = "/projects" }: EditorHeaderProps) {
+export function EditorHeader({
+  endSlot,
+  centerSlot,
+  exitTo = "/projects",
+}: EditorHeaderProps) {
   return (
-    <header className="bg-background flex h-[3.4rem] items-center justify-between px-3 pt-0.5">
-      <div className="flex items-center gap-1">
+    <header className="bg-background flex h-[3.4rem] items-center justify-between gap-3 px-3 pt-0.5">
+      <div className="flex shrink-0 items-center gap-1">
         <ProjectDropdown exitTo={exitTo} />
         <EditableProjectName />
       </div>
+      {centerSlot && (
+        <div className="flex min-w-0 flex-1 justify-center">{centerSlot}</div>
+      )}
       <nav className="flex items-center gap-2">
         <CurrentUserBadge />
         <ExportButton />

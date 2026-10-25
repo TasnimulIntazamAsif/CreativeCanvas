@@ -1,5 +1,5 @@
 import type { EditorCore } from "../index";
-import type { Command, CommandResult } from "../../commands";
+import { BatchCommand, type Command, type CommandResult } from "../../commands";
 import type { EditorSelectionSnapshot } from "../../selection/editor-selection";
 import { applyRippleAdjustments, computeRippleAdjustments } from "../../ripple";
 import type { SceneTracks } from "../../timeline/types";
@@ -42,6 +42,24 @@ export class CommandManager {
       previousSelection: this.getSelectionSnapshot(),
     });
     this.redoStack = [];
+  }
+
+  /** Number of undoable entries; pair with `collapseHistorySince`. */
+  getHistoryLength(): number {
+    return this.history.length;
+  }
+
+  // Folds every entry recorded after `startLength` into one undo step, so a
+  // multi-command operation (e.g. one AI edit request) undoes in one go.
+  collapseHistorySince({ startLength }: { startLength: number }): void {
+    const entries = this.history.slice(startLength);
+    if (entries.length < 2) return;
+    this.history = this.history.slice(0, startLength);
+    this.history.push({
+      command: new BatchCommand(entries.map((entry) => entry.command)),
+      previousSelection: entries[0].previousSelection,
+      selectionOverride: entries[entries.length - 1].selectionOverride,
+    });
   }
 
   registerReactor(reactor: () => void): void {

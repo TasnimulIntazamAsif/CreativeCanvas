@@ -12,6 +12,9 @@ use tauri::State;
 const ALL_KEYS: &[ProviderCredentialKey] = &[
   ProviderCredentialKey::FalApiKey,
   ProviderCredentialKey::ReplicateApiKey,
+  ProviderCredentialKey::OpenaiApiKey,
+  ProviderCredentialKey::GeminiApiKey,
+  ProviderCredentialKey::DeepseekApiKey,
   ProviderCredentialKey::GrokWebLogin,
   ProviderCredentialKey::HiggsfieldWebLogin,
   ProviderCredentialKey::MidjourneyLogin,

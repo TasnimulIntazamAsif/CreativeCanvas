@@ -13,6 +13,8 @@ import { tauriAuthUserAdapter } from "./adapters/auth-user-adapter";
 import { tauriMediaSourceAdapter } from "./adapters/media-source-adapter";
 import { tauriExportSinkAdapter } from "./adapters/export-sink-adapter";
 import { useTauriAssetGalleryAdapter } from "./adapters/asset-gallery-adapter";
+import { whisperTranscriptionAdapter } from "./adapters/transcription-adapter";
+import { AiCommandBar } from "./ai/AiCommandBar";
 
 // Tauri host for the @storyteller/ui-video-editor lib.
 //
@@ -61,6 +63,7 @@ export function PageVideoEditor() {
       mediaSource: tauriMediaSourceAdapter,
       assetGallery: assetGalleryAdapter,
       exportSink: tauriExportSinkAdapter,
+      transcription: whisperTranscriptionAdapter,
     }),
     [assetGalleryAdapter],
   );
@@ -93,7 +96,7 @@ export function PageVideoEditor() {
 
   return (
     <div className="h-full w-full overflow-hidden">
-      <VideoEditor adapters={adapters} />
+      <VideoEditor adapters={adapters} headerCenterSlot={<AiCommandBar />} />
       {galleryModal}
     </div>
   );

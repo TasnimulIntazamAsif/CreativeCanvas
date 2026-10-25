@@ -1,7 +1,8 @@
 import { effectsRegistry } from "../registry";
 import { blurEffectDefinition } from "./blur";
+import { CANVAS_EFFECT_DEFINITIONS } from "./canvas-effects";
 
-const defaultEffects = [blurEffectDefinition];
+const defaultEffects = [blurEffectDefinition, ...CANVAS_EFFECT_DEFINITIONS];
 
 // Called by EditorCore at construction (and from any host setup that
 // bypasses EditorCore). Idempotent — re-registering a known type is a

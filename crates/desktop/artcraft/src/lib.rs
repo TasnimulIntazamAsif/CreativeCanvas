@@ -32,6 +32,8 @@ use crate::core::commands::media_files::media_file_delete_command::media_file_de
 use crate::core::commands::platform_info_command::platform_info_command;
 use crate::core::commands::providers::deprecated::get_provider_order_command::get_provider_order_command;
 use crate::core::commands::providers::deprecated::set_provider_order_command::set_provider_order_command;
+use crate::core::commands::llm::llm_chat_completion_command::llm_chat_completion_command;
+use crate::core::commands::llm::llm_transcribe_audio_command::llm_transcribe_audio_command;
 use crate::core::commands::providers::provider_clear_command::provider_clear_command;
 use crate::core::commands::providers::provider_list_command::provider_list_command;
 use crate::core::commands::providers::provider_set_api_key_command::provider_set_api_key_command;
@@ -256,6 +258,8 @@ pub fn run() {
     grok_clear_credentials_command,
     grok_get_credential_info_command,
     grok_open_login_command,
+    llm_chat_completion_command,
+    llm_transcribe_audio_command,
     load_without_cors_command,
     mark_task_as_dismissed_command,
     media_file_delete_command,
