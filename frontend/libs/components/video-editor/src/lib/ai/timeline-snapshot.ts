@@ -8,6 +8,8 @@ import { mediaTimeToSeconds, type MediaTime } from "../wasm";
 
 export interface TimelineSnapshot {
   canvas: { width: number; height: number };
+  /** Project background: a CSS color/gradient, or a blur of the video. */
+  background: { type: "color"; color: string } | { type: "blur"; blurIntensity: number } | null;
   fps: number | null;
   duration_seconds: number;
   playhead_seconds: number;
@@ -63,6 +65,7 @@ export function buildTimelineSnapshot({
 
   return {
     canvas: project?.settings.canvasSize ?? { width: 1920, height: 1080 },
+    background: project?.settings.background ?? null,
     fps: fps ? fps.numerator / fps.denominator : null,
     duration_seconds: toSeconds(editor.timeline.getTotalDuration()),
     playhead_seconds: toSeconds(editor.playback.getCurrentTime()),

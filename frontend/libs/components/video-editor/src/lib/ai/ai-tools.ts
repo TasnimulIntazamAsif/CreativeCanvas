@@ -1,5 +1,8 @@
+import { BACKGROUND_BLUR_INTENSITY_PRESETS } from "../background/blur";
+import { DEFAULT_CANVAS_PRESETS } from "../canvas/sizes";
 import type { EditorCore } from "../core";
 import { effectsRegistry } from "../effects";
+import { floatToFrameRate } from "../fps/utils";
 import type { ParamValues } from "../params";
 import {
   buildElementFromMedia,
@@ -15,6 +18,18 @@ import { buildTimelineSnapshot } from "./timeline-snapshot";
 // a regular undoable command.
 
 const DEFAULT_IMAGE_DURATION_SECONDS = 5;
+
+// Aspect-ratio presets, matching the Settings panel's preset canvas sizes.
+const ASPECT_RATIO_SIZES: Record<string, { width: number; height: number }> = {
+  "16:9": DEFAULT_CANVAS_PRESETS[0],
+  "9:16": DEFAULT_CANVAS_PRESETS[1],
+  "1:1": DEFAULT_CANVAS_PRESETS[2],
+  "4:3": DEFAULT_CANVAS_PRESETS[3],
+};
+
+const FRAME_RATES = [24, 25, 30, 60, 120];
+const MIN_CANVAS_SIDE = 16;
+const MAX_CANVAS_SIDE = 8192;
 
 export interface AiToolDefinition {
   type: "function";
@@ -133,6 +148,39 @@ export const AI_TOOL_DEFINITIONS: AiToolDefinition[] = [
     required: ["track_id"],
   }),
   tool({
+    name: "set_canvas_size",
+    description:
+      "Change the project's canvas (output frame) size. Use aspect_ratio for the standard presets (16:9 landscape/YouTube, 9:16 vertical/Reels/TikTok/Shorts, 1:1 square, 4:3), or width+height in pixels for a custom size. Existing clips keep their position relative to the canvas center.",
+    properties: {
+      aspect_ratio: { type: "string", enum: Object.keys(ASPECT_RATIO_SIZES) },
+      width: { type: "number", description: "Custom width in pixels (with height)." },
+      height: { type: "number", description: "Custom height in pixels (with width)." },
+    },
+  }),
+  tool({
+    name: "set_background",
+    description:
+      "Change the project background shown behind all clips. type=color takes a CSS color (e.g. #1e293b) or a CSS gradient (e.g. linear-gradient(135deg, #8b5cf6, #06b6d4)). type=blur fills the empty canvas area with a blurred copy of the video.",
+    properties: {
+      type: { type: "string", enum: ["color", "blur"] },
+      color: { type: "string", description: "CSS color or gradient when type=color." },
+      blur: {
+        type: "string",
+        enum: BACKGROUND_BLUR_INTENSITY_PRESETS.map((preset) => preset.label.toLowerCase()),
+        description: "Blur strength when type=blur. Default medium.",
+      },
+    },
+    required: ["type"],
+  }),
+  tool({
+    name: "set_frame_rate",
+    description: "Change the project frame rate.",
+    properties: {
+      fps: { type: "number", enum: FRAME_RATES },
+    },
+    required: ["fps"],
+  }),
+  tool({
     name: "seek",
     description: "Move the playhead to a time so the user sees that moment in the preview.",
     properties: {
@@ -185,6 +233,18 @@ export function executeAiTool({
       return addEffect({ editor, args });
     case "set_track_state":
       return setTrackState({ editor, args });
+    case "set_canvas_size":
+      return setCanvasSize({ editor, args });
+    case "set_background":
+      return setBackground({ editor, args });
+    case "set_frame_rate": {
+      const fps = requireNumber(args.fps, "fps");
+      if (!FRAME_RATES.includes(fps)) {
+        throw new Error(`fps must be one of ${FRAME_RATES.join(", ")}.`);
+      }
+      editor.project.updateSettings({ settings: { fps: floatToFrameRate(fps) } });
+      return `Frame rate set to ${fps} fps.`;
+    }
     case "seek": {
       const seconds = requireNumber(args.seconds, "seconds");
       editor.playback.seek({ time: mediaTimeFromSeconds({ seconds: Math.max(0, seconds) }) });
@@ -193,6 +253,70 @@ export function executeAiTool({
     default:
       throw new Error(`Unknown tool: ${name}`);
   }
+}
+
+function setCanvasSize({
+  editor,
+  args,
+}: {
+  editor: EditorCore;
+  args: Record<string, unknown>;
+}): string {
+  const aspectRatio = optionalString(args.aspect_ratio);
+  if (aspectRatio) {
+    const size = ASPECT_RATIO_SIZES[aspectRatio];
+    if (!size) {
+      throw new Error(`aspect_ratio must be one of ${Object.keys(ASPECT_RATIO_SIZES).join(", ")}.`);
+    }
+    editor.project.updateSettings({
+      settings: { canvasSize: { ...size }, canvasSizeMode: "preset" },
+    });
+    return `Canvas set to ${aspectRatio} (${size.width}x${size.height}).`;
+  }
+
+  const width = optionalNumber(args.width);
+  const height = optionalNumber(args.height);
+  if (width == null || height == null) {
+    throw new Error("Pass aspect_ratio, or both width and height.");
+  }
+  const size = { width: clampCanvasSide(width), height: clampCanvasSide(height) };
+  editor.project.updateSettings({
+    settings: { canvasSize: size, canvasSizeMode: "custom", lastCustomCanvasSize: size },
+  });
+  return `Canvas set to ${size.width}x${size.height}.`;
+}
+
+function setBackground({
+  editor,
+  args,
+}: {
+  editor: EditorCore;
+  args: Record<string, unknown>;
+}): string {
+  const type = requireString(args.type, "type");
+  if (type === "blur") {
+    const level = optionalString(args.blur) ?? "medium";
+    const preset = BACKGROUND_BLUR_INTENSITY_PRESETS.find(
+      (option) => option.label.toLowerCase() === level.toLowerCase(),
+    );
+    if (!preset) {
+      throw new Error(
+        `blur must be one of ${BACKGROUND_BLUR_INTENSITY_PRESETS.map((o) => o.label.toLowerCase()).join(", ")}.`,
+      );
+    }
+    editor.project.updateSettings({
+      settings: { background: { type: "blur", blurIntensity: preset.value } },
+    });
+    return `Background set to ${preset.label.toLowerCase()} blur.`;
+  }
+  if (type !== "color") throw new Error('type must be "color" or "blur".');
+
+  const color = requireString(args.color, "color");
+  if (!isValidCssBackground(color)) {
+    throw new Error(`"${color}" is not a valid CSS color or gradient.`);
+  }
+  editor.project.updateSettings({ settings: { background: { type: "color", color } } });
+  return `Background set to ${color}.`;
 }
 
 function addText({
@@ -458,6 +582,19 @@ function listElements({
   return tracks.flatMap((track) =>
     (track.elements as TimelineElement[]).map((element) => ({ track, element })),
   );
+}
+
+function clampCanvasSide(value: number): number {
+  // Even dimensions keep H.264 export happy.
+  const rounded = Math.round(Math.max(MIN_CANVAS_SIDE, Math.min(MAX_CANVAS_SIDE, value)) / 2) * 2;
+  return rounded;
+}
+
+// Accepts anything the browser can paint as a background (colors and
+// gradients); rejects typos before they reach the renderer.
+function isValidCssBackground(value: string): boolean {
+  if (typeof CSS === "undefined" || typeof CSS.supports !== "function") return true;
+  return CSS.supports("color", value) || CSS.supports("background-image", value);
 }
 
 function tool({

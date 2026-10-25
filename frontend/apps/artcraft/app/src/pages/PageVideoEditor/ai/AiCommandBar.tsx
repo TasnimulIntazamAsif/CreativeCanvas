@@ -132,6 +132,9 @@ const TOOL_LABELS: Record<string, string> = {
   duplicate_elements: "Duplicating elements…",
   add_effect: "Adding an effect…",
   set_track_state: "Updating a track…",
+  set_canvas_size: "Resizing the canvas…",
+  set_background: "Changing the background…",
+  set_frame_rate: "Changing the frame rate…",
   seek: "Moving the playhead…",
 };
 
