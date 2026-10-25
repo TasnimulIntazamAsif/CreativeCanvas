@@ -105,3 +105,7 @@ windows/sqlite/sqlite3.lib
 crates/desktop/src-tauri/*.dll
 windows_dlls/
 
+
+# Root README and ROADMAP (kept locally, not shared)
+/README.md
+/ROADMAP.md
