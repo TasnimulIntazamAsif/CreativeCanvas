@@ -385,7 +385,7 @@ export const TopBar = ({ pageName }: Props) => {
       case "APPS":
         return ["Home"];
       default:
-        return ["ArtCraft"];
+        return ["CreativeCanvas"];
     }
   };
 
