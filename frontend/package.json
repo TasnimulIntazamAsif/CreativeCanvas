@@ -123,5 +123,10 @@
     "libs/analytics/*",
     "libs/components/*",
     "libs/state/*"
-  ]
+  ],
+  "allowScripts": {
+    "nx@21.2.3": true,
+    "@swc/core@1.5.29": true,
+    "@swc/core@1.15.40": true
+  }
 }
