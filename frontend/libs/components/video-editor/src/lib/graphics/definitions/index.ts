@@ -3,12 +3,14 @@ import { ellipseGraphicDefinition } from "./ellipse";
 import { polygonGraphicDefinition } from "./polygon";
 import { rectangleGraphicDefinition } from "./rectangle";
 import { starGraphicDefinition } from "./star";
+import { OUTLINE_SHAPE_DEFINITIONS } from "./outline-shapes";
 
 const defaultGraphicDefinitions = [
   rectangleGraphicDefinition,
   ellipseGraphicDefinition,
   polygonGraphicDefinition,
   starGraphicDefinition,
+  ...OUTLINE_SHAPE_DEFINITIONS,
 ];
 
 // Idempotent self-registration. Called from EditorCore and from
