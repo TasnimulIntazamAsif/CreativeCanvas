@@ -4,6 +4,7 @@ import {
   EditorCore,
   buildDefaultScene,
   createDefaultAdapters,
+  createLocalFileMediaSource,
   ZERO_MEDIA_TIME,
   type TProject,
   type VideoEditorAdapters,
@@ -14,7 +15,17 @@ import { tauriMediaSourceAdapter } from "./adapters/media-source-adapter";
 import { tauriExportSinkAdapter } from "./adapters/export-sink-adapter";
 import { useTauriAssetGalleryAdapter } from "./adapters/asset-gallery-adapter";
 import { whisperTranscriptionAdapter } from "./adapters/transcription-adapter";
+import { isDesktopApp } from "./ai/describeAiError";
 import { AiCommandBar } from "./ai/AiCommandBar";
+
+// The desktop app uploads through the local Rust backend
+// (tauriMediaSourceAdapter → MediaUploadApi on https://localhost:12345).
+// That backend only exists inside the Tauri runtime, so when this same
+// frontend is served as a plain website the upload POSTs go nowhere and
+// drag-and-drop imports fail. In a browser we fall back to the lib's
+// in-memory blob-URL media source so local imports work (they just don't
+// persist across reloads, and cloud generation/library stay desktop-only).
+const webMediaSourceAdapter = createLocalFileMediaSource();
 
 // Tauri host for the @storyteller/ui-video-editor lib.
 //
@@ -60,7 +71,7 @@ export function PageVideoEditor() {
     () => ({
       toast: tauriToastAdapter,
       authUser: tauriAuthUserAdapter,
-      mediaSource: tauriMediaSourceAdapter,
+      mediaSource: isDesktopApp() ? tauriMediaSourceAdapter : webMediaSourceAdapter,
       assetGallery: assetGalleryAdapter,
       exportSink: tauriExportSinkAdapter,
       transcription: whisperTranscriptionAdapter,

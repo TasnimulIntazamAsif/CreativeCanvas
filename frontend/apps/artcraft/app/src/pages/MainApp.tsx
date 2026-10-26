@@ -98,6 +98,9 @@ const PageScene = lazy(() =>
 const PageVideoEditor = lazy(() =>
   import("./PageVideoEditor").then((m) => ({ default: m.PageVideoEditor })),
 );
+const PageVideoFilming = lazy(() =>
+  import("./PageVideoFilming").then((m) => ({ default: m.PageVideoFilming })),
+);
 const PageMoodboard = lazy(() =>
   import("./PageMoodboard").then((m) => ({ default: m.PageMoodboard })),
 );
@@ -309,6 +312,12 @@ const TabBody = ({ sceneToken }: { sceneToken?: string }) => {
       return (
         <div className="h-[calc(100vh-3rem)] w-full">
           <PageVideoEditor />
+        </div>
+      );
+    case "VIDEO_FILMING":
+      return (
+        <div className="h-[calc(100vh-56px)] w-full overflow-hidden">
+          <PageVideoFilming />
         </div>
       );
     case "MOODBOARD":

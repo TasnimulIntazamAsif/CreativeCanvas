@@ -381,6 +381,8 @@ export const TopBar = ({ pageName }: Props) => {
         return ["Studio", "Background Change"];
       case "VIDEO_EDITOR":
         return ["Studio", "Edit Video"];
+      case "VIDEO_FILMING":
+        return ["Studio", "Video Filming"];
       case "MOODBOARD":
         return ["Studio", "Moodboard"];
       case "APPS":

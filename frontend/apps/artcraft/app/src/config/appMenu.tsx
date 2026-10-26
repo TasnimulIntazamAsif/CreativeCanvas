@@ -24,6 +24,7 @@ export type AppId =
   | "STORYBOARD"
   | "BACKGROUND_CHANGE"
   | "VIDEO_EDITOR"
+  | "VIDEO_FILMING"
   | "MOODBOARD";
 
 export interface AppDescriptor {
@@ -145,6 +146,12 @@ const APP_CARD_PALETTES: Record<string, AppCardPalette> = {
     iconBg: "bg-rose-500/20 border-rose-400/40",
     iconColor: "text-rose-300",
     hoverStyle: "hover:border-rose-400/60 hover:bg-rose-500/10",
+  },
+  "video-filming": {
+    accent: "from-purple-500/20 to-purple-500/0",
+    iconBg: "bg-purple-500/20 border-purple-400/40",
+    iconColor: "text-purple-300",
+    hoverStyle: "hover:border-purple-400/60 hover:bg-purple-500/10",
   },
   moodboard: {
     accent: "from-indigo-500/20 to-indigo-500/0",
@@ -355,6 +362,16 @@ export const ALL_APPS: FullAppItem[] = [
     badge: "BETA",
   },
   {
+    id: "video-filming",
+    label: "Video Filming",
+    description: "FilmCraft: the open-source, pure-Rust pro video editor",
+    icon: FilmIcon,
+    category: "edit",
+    action: "VIDEO_FILMING",
+    color: "bg-purple-600/40",
+    badge: "NEW",
+  },
+  {
     id: "2d-canvas",
     label: "Image Editor",
     description: "Easy edits. Great for graphic design.",
@@ -443,6 +460,7 @@ export const goToApp = (action?: string) => {
       "STORYBOARD",
       "BACKGROUND_CHANGE",
       "VIDEO_EDITOR",
+      "VIDEO_FILMING",
       "MOODBOARD",
     ].includes(action)
   ) {

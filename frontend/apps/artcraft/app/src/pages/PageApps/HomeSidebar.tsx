@@ -48,6 +48,7 @@ const SECTIONS: SidebarSection[] = [
       appItem("Edit Image", PencilIcon, "2D"),
       appItem("Edit 3D", BoxesIcon, "3D"),
       appItem("Edit Video", FilmIcon, "VIDEO_EDITOR", "BETA"),
+      appItem("Video Filming", FilmIcon, "VIDEO_FILMING", "NEW"),
       appItem("BG Change", WandSparklesIcon, "BACKGROUND_CHANGE"),
       appItem("Moodboard", ScanIcon, "MOODBOARD", "BETA"),
       appItem("Frame Extract", ImagesIcon, "VIDEO_FRAME_EXTRACTOR", "NEW"),
