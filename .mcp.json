@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "creativecanvas-render": {
+      "command": "node",
+      "args": ["render-mcp-server/dist/index.js"]
+    }
+  }
+}
